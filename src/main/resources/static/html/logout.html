@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Leaving?</title>
+    <style>
+        body {
+            background: linear-gradient(45deg, #ff00ff, #00ffff, #ffff00);
+            font-family: "Comic Sans MS", cursive;
+            cursor: wait;
+            text-align: center;
+            padding-top: 20vh;
+        }
+        marquee {
+            font-size: 32px;
+            color: red;
+            text-shadow: 2px 2px yellow;
+        }
+        button {
+            font-size: 8px; /* good luck clicking this */
+            padding: 2px;
+            margin-top: 200px;
+            background: #ccc;
+            border: 3px outset #999;
+        }
+<!--        button:hover {-->
+<!--            transform: translateX(100px); /* run away button */-->
+<!--            transition: 0.1s;-->
+<!--        }-->
+    </style>
+</head>
+<body>
+<marquee behavior="alternate">ARE YOU SURE YOU WANT TO LEAVE???</marquee>
+<h3 style="color: lime;">Your session will feel abandoned...</h3>
+<p style="font-size: 10px;">Think of all the database hits we'll miss together</p>
+
+<form action="/req/logout" method="post">
+    <button type="submit">yes</button>
+</form>
+
+<audio autoplay loop>
+    <source src="https://www.myinstants.com/media/sounds/windows-xp-error.mp3" type="audio/mpeg">
+</audio>
+</body>
+</html>
