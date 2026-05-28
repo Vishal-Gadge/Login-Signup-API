@@ -38,10 +38,11 @@ public class SecurityConfig {
                     .authorizeHttpRequests(auth -> {
                         auth.requestMatchers("/req/signup", "/req/login","/req/signup/save",
                                             "/req/login/**","/req/login/verify","/favicon.ico",
-                                             "/req/logout","/html/logout.html",
-                                             "/req/forgotPass","/html/forgotPass.html",
+                                             "/req/logout","/html/logout.html","/test/**",
+                                             "/req/forgotPass","/html/forgotPass.html","/redis-test",
 											 "/css/**","/js/**","/images/**","/static/**")
                                 .permitAll();
+                        auth.requestMatchers("/admin/**").hasRole("ADIMIN");
                         auth.anyRequest().authenticated();
                     })
 

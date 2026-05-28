@@ -5,6 +5,9 @@ import jakarta.transaction.Transactional;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -15,6 +18,12 @@ import com.dangerarmy.loginregisterapp.model.UserModel;
 import com.dangerarmy.loginregisterapp.repo.UserRepo;
 
 import lombok.AllArgsConstructor;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.time.Duration;
+import java.util.Map;
+import java.util.Objects;
+
 @Service
 @AllArgsConstructor
 @Primary
@@ -22,6 +31,9 @@ public class MyAppUserService implements UserDetailsService{
 
     @Autowired
     private UserRepo userRepo;
+
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
 
 
     @Override
@@ -33,13 +45,29 @@ public class MyAppUserService implements UserDetailsService{
     }
 
     @Transactional
-    public void updatePassword(String email , String username, String newPassword){
+    public void updatePassword(UserModel userModel){
+        String key = "rate_limit_"+userModel.getEmail();
+        String attemptStr = redisTemplate.opsForValue().get(key);
+        long redisAttempt = attemptStr == null ? 0 : Long.parseLong(attemptStr);
 
-        String encodedPass = new BCryptPasswordEncoder(12).encode(newPassword);
+        if (redisAttempt >= 3){
+            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,
+                    "Too many failure requests. Try again after 10 min");
+        }
 
-        int rowsUpdated = userRepo.updatePasswordByEmailAndUsername(email,username,encodedPass);
+        String encodedPass = new BCryptPasswordEncoder(12).encode(userModel.getPassword());
+        int rowsUpdated = userRepo.updatePasswordByEmailAndUsername(userModel.getEmail(),
+                userModel.getUsername(),encodedPass);
 
         if(rowsUpdated == 0){
+            long attempts = redisTemplate.opsForValue().increment(key);
+            if(attempts == 1){
+                redisTemplate.expire(key , Duration.ofMinutes(10));
+            }
+            if(attempts > 3){
+            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,
+                    "Too many failure requests. Try again after 10 min");
+            }
             throw new UsernameNotFoundException("User not found or username dosen't match email");
         }
     }

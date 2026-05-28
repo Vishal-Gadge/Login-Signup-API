@@ -35,6 +35,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 path.startsWith("/images") ||
                 path.startsWith("/static") ||
                 path.startsWith("/req/") ||
+                path.startsWith("/test") ||
                 path.startsWith("/.well-known/appspecific/com.chrome.devtools.json") ||
                 path.equals("/favicon.ico") ||
                 path.equals("/req/signup") ||
@@ -44,7 +45,8 @@ public class JwtFilter extends OncePerRequestFilter {
                 path.equals("/req/login.html") ||
                 path.equals("/req/logout") ||
                 path.equals("/html/forgotPass.html") ||
-                path.equals("/req/forgotPass");
+                path.equals("/req/forgotPass") ||
+                path.equals("/redis-test");
     }
 
     @Override
