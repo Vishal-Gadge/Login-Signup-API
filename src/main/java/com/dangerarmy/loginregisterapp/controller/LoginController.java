@@ -35,7 +35,7 @@ public class LoginController {
         }
 
         String jwt = jwtService.generateToken(dbUser);
-
+        System.out.println("Token is : "+jwt);
         ResponseCookie cookie = ResponseCookie.from("jwt" , jwt)
                 .httpOnly(true)
                 .secure(false)

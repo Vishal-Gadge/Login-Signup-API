@@ -42,7 +42,7 @@ public class SecurityConfig {
                                              "/req/forgotPass","/html/forgotPass.html","/redis-test",
 											 "/css/**","/js/**","/images/**","/static/**")
                                 .permitAll();
-                        auth.requestMatchers("/admin/**").hasRole("ADIMIN");
+                        auth.requestMatchers("/admin/**").hasRole("ADMIN");
                         auth.anyRequest().authenticated();
                     })
 

@@ -32,4 +32,9 @@ public class ContentController {
         System.out.println("Home page git - user is logged in");
         return "index";
     }
+
+    @GetMapping("/admin/showAdminPanel")
+    public String showAdminPanel(){
+        return "admin.html";
+    }
 }

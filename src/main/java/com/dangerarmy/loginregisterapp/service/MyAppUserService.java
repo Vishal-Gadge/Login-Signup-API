@@ -1,6 +1,7 @@
 package com.dangerarmy.loginregisterapp.service;
 
 import com.dangerarmy.loginregisterapp.model.MyUserDetailsModel;
+import com.dangerarmy.loginregisterapp.repo.UserRolesRepo;
 import jakarta.transaction.Transactional;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -33,6 +35,9 @@ public class MyAppUserService implements UserDetailsService{
     private UserRepo userRepo;
 
     @Autowired
+    private UserRolesRepo userRolesRepo;
+
+    @Autowired
     private RedisTemplate<String, String> redisTemplate;
 
 
@@ -41,7 +46,8 @@ public class MyAppUserService implements UserDetailsService{
         UserModel user = userRepo.findByEmail(email)
                 .orElseThrow(()-> new UsernameNotFoundException("User not found in db for that email"));
 
-        return new MyUserDetailsModel(user);
+        List<String> roles = userRolesRepo.getRoles(user.getId());
+        return new MyUserDetailsModel(user,roles);
     }
 
     @Transactional

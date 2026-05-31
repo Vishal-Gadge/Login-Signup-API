@@ -2,10 +2,14 @@ package com.dangerarmy.loginregisterapp.service;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+
+import com.dangerarmy.loginregisterapp.repo.UserRolesRepo;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import java.util.Date;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.dangerarmy.loginregisterapp.model.UserModel;
@@ -15,6 +19,9 @@ import javax.crypto.SecretKey;
 @Service
 @Slf4j
 public class JwtService {
+
+    @Autowired
+    private UserRolesRepo userRolesRepo;
 
     private final SecretKey key;
 
@@ -29,6 +36,7 @@ public class JwtService {
     public String generateToken(UserModel user){
         Map<String, Object> claims = new HashMap<>();
         claims.put("email",user.getEmail());
+        claims.put("roles",userRolesRepo.getRoles(user.getId()));
         return Jwts.builder()
                     .claims(claims)
                     .subject(user.getEmail())

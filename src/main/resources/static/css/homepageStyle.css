@@ -52,6 +52,13 @@ body {
     transition: color 0.3s;
 }
 
+#adminBtn{
+    text-decoration: none;
+    color: #555;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
 .nav-links a:hover {
     color: #007bff;
 }
