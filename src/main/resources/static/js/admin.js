@@ -28,18 +28,17 @@ if(adminBtn != null){
 
 
 //admin.html
-document.addEventListener('DOMContentLoaded',async () => {
-    const body = document.querySelector('#showAllUsersBody');
-    if(body != null){
-        body.innerHTML = "<h1>User data is getting fetched...</h1>";
+//to show all users
+document.addEventListener('DOMContentLoaded', async () => {
+    const container = document.querySelector('#showAllUsersDiv');
+    if(container != null){
+        container.innerHTML = "<h2>Data is getting fetched...</h2>";
         const response = await fetch('/admin/getAllUsers',{
-            method:'POST',
             credentials:'include'
         })
         const result = await response.json();
         if(response.ok){
-            console.log("response is ok");
-            showAllUsers(result,body);
+            showAllUsersData(container,result);
         }else{
             console.error('Cannot get data');
             alert(result.error);
@@ -47,21 +46,113 @@ document.addEventListener('DOMContentLoaded',async () => {
     }
 })
 
-function showAllUsers(users,body){
-    body.innerHTML="<h1>this is data showing page</h1><div id='resultSet'></div><br>";
-    const resultSet = document.querySelector('#resultSet');
-    resultSet.innerHTML=
-    `<table id='table'>
-        <tr><th>id</th><th>username</th><th>email</th></tr>
-        <tbody></tbody>
-    </table>`;
-    const tbody = document.querySelector('#table tbody');
-    let rows = '';
-        users.forEach(user => {
+function showAllUsersData(container,data){
+    if(data.length !== 0){
+        container.innerHTML="<h1>All Users data</h1><div id='resultSet'></div><br>";
+        const resultSet = document.querySelector('#resultSet');
+        resultSet.innerHTML=
+        `<table id='table'>
+            <thead>
+                <tr><th>id</th><th>username</th><th>email</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>`;
+        const tbody = document.querySelector('#table tbody');
+        let rows = '';
+        data.forEach(user => {
             rows += `<tr><td>${user.id}</td><td>${user.username}</td><td>${user.email}</td></tr>`;
         });
         tbody.innerHTML = rows;
+    }else{
+        console.error("Didnt get any data");
+        return;
+    }
 }
 
-const getAllAdmins = document.querySelector("#showAllAdminsBtn");
-const addAdmin = document.querySelector("#addNewAdminBtn");
+
+
+//to get all admins
+document.addEventListener('DOMContentLoaded',async () => {
+    const container = document.getElementById('showAllAdminsDiv');
+    if(container != null){
+        container.innerHTML ='<h2>Data is getting fetched...</h2>';
+        const response = await fetch('/admin/getAllAdmins',{
+            credentials:'include'
+        })
+        const result = await response.json();
+        if(response.ok){
+            showAllAdmins(container,result);
+        }else{
+            console.error('result.error');
+            return;
+        }
+    }
+})
+
+async function showAllAdmins(container,data){
+    if(data.length !== 0){
+        container.innerHTML='<h2>Admin Data is:</h2><div id="resultSet"></div>';
+        const resultSet = document.getElementById('resultSet');
+        resultSet.innerHTML=`<table><thead>
+            <tr><th>id</th><th>username</th><th>email</th></tr>
+        </thead><tbody></tbody></table>`;
+        const tableBody = document.querySelector('tbody');
+        data.forEach(row => {
+            tableBody.innerHTML += `<tr>
+            <td>${row.id}</td>
+            <td>${row.username}</td>
+            <td>${row.email}</td></tr>`;
+        })
+    }else{
+        console.error('Data is not present for that request');
+        return;
+    }
+}
+
+
+
+//to add new admin
+const addNewAdminBtn = document.querySelector('#addNewAdminBtn');
+if(addNewAdminBtn !== null){
+    addNewAdminBtn.addEventListener('click',async (evt) => {
+        evt.preventDefault();
+    
+        let admin = {
+            username:document.querySelector('#name').value,
+            email:document.querySelector('#email').value,
+            password:document.querySelector('#password').value
+        }
+
+        let confirmPassword = document.querySelector('#confirmPassword').value;
+
+        if(admin.username.trim() === "" ||
+            admin.email.trim() === "" ||
+            admin.password.trim() === "" ||
+            confirmPassword.trim() === ""){
+                alert("Kindly enter details first");
+                return;
+        }
+
+        if(admin.password !== confirmPassword){
+            alert("Password don't match Confirm password")
+            return;
+        }
+
+        const response = await fetch('/admin/addAdmin',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify(admin),
+            credentials:'include'
+        });
+
+        const result = await response.json();
+
+        if(response.ok){
+            alert("Admin Saved");
+            window.location.href='/admin/showAdminPanel';
+        }else{
+            alert("Admin saved failed");
+            console.error("Admin saved failed");
+        }
+    })
+}

@@ -1,16 +1,13 @@
 package com.dangerarmy.loginregisterapp.controller;
 
+import com.dangerarmy.loginregisterapp.dto.AdminReqUsers;
 import com.dangerarmy.loginregisterapp.model.UserModel;
-import com.dangerarmy.loginregisterapp.model.UserRoles;
 import com.dangerarmy.loginregisterapp.repo.UserRepo;
-import com.dangerarmy.loginregisterapp.repo.UserRolesRepo;
-import jakarta.servlet.http.HttpServletResponse;
+import com.dangerarmy.loginregisterapp.service.AdminService;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,23 +20,30 @@ public class AdminController {
     private UserRepo userRepo;
 
     @Autowired
-    private UserRolesRepo userRolesRepo;
+    private AdminService adminService;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    @GetMapping("/getAllUsers")
+    public List<AdminReqUsers> getAllUsers(){
+        return userRepo.getAllUsersExceptPass();
+    }
 
-    @PostMapping("/getAllUsers")
-    public List<UserModel> getAllUsers(){
-        return userRepo.findAll();
+    @GetMapping("/getAllAdmins")
+    public List<AdminReqUsers> getAllAdmins(){
+        return userRepo.getAllAdmins();
     }
 
     @PostMapping("/addAdmin")
     public ResponseEntity<Map<String, String>> addAdmin(@RequestBody UserModel admin){
-        admin.setPassword(passwordEncoder.encode(admin.getPassword()));
-        userRepo.save(admin);
-        userRolesRepo.save(new UserRoles(null,admin,"ADMIN"));
-        userRolesRepo.save(new UserRoles(null,admin,"USER"));
-        return ResponseEntity.ok(Map.of("message","Admin Saved Successfully"));
+        try {
+            adminService.addAdmin(admin);
+            System.out.println("new admin added successfully");
+            return ResponseEntity.ok(Map.of("message","Admin Saved Successfully"));
+        } catch (Exception e) {
+            System.out.println("admin was not added"+e.getMessage());
+            System.out.println(e.getCause());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                 .body(Map.of("error","Unfortunately Admin was not saved"));
+        }
     }
 
     @GetMapping("/verify")

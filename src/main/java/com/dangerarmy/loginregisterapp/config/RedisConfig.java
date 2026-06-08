@@ -28,7 +28,10 @@ public class RedisConfig {
                         .fromSerializer(RedisSerializer.json()));
 
         Map<String , RedisCacheConfiguration> cacheConfigs = Map.of(
-                "users",config.entryTtl(Duration.ofHours(1)),
+                "user",config.entryTtl(Duration.ofHours(1)),
+                "userRole",config.entryTtl(Duration.ofMinutes(10)),
+                "allUsers",config.entryTtl(Duration.ofMinutes(1)),
+                "allAdmins",config.entryTtl(Duration.ofMinutes(1)),
                 "test", config.entryTtl(Duration.ofSeconds(30))
                 );
         return RedisCacheManager.builder(connectionFactory)
