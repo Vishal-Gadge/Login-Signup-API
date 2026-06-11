@@ -24,8 +24,6 @@ if(signupBtn != null){
             return;
         }
 
-
-
         const response = await fetch(baseUrl+"/req/signup/save" , {
             method:"POST",
             headers:{"Content-Type":"application/json"},

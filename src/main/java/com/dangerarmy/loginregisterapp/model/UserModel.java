@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class UserModel {
 
     @Id
@@ -21,4 +20,7 @@ public class UserModel {
     private String username;
     private String email;
     private String password;
+
+    private boolean isVerified = false;
+    private String token;
 }

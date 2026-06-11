@@ -39,6 +39,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 path.startsWith("/.well-known/appspecific/com.chrome.devtools.json") ||
                 path.equals("/favicon.ico") ||
                 path.equals("/req/signup") ||
+                path.startsWith("/verify/login") ||
                 path.equals("/req/signup/save") ||
                 path.equals("/req/login") ||
                 path.equals("/req/login/verify") ||

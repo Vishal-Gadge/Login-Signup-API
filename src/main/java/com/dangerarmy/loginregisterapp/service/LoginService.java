@@ -25,4 +25,14 @@ public class LoginService {
         }
         return null;
     }
+
+    public boolean verifyEmail(String token){
+        UserModel dbuser = userRepo.findByToken(token);
+        if(dbuser != null){
+            dbuser.setVerified(true);
+            dbuser.setToken(null);
+            userRepo.save(dbuser);
+        }
+        return false;
+    }
 }

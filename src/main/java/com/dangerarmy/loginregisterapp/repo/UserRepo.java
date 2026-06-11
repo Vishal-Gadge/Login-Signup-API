@@ -19,7 +19,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserRepo extends JpaRepository<UserModel,Integer>{
 
-    @Cacheable(value = "user" , key = "#email")
+    @Cacheable(value = "user" ,unless = "#result == null", key = "#email")
     Optional<UserModel> findByEmail(String email);
 
     @CachePut(value = "user" , key = "#entity.email")
@@ -49,4 +49,21 @@ public interface UserRepo extends JpaRepository<UserModel,Integer>{
     @Query(value ="SELECT u.id,u.username,u.email FROM user_model u JOIN user_roles r ON u.id=r.user_id where r.roles = 'ADMIN'",
                 nativeQuery = true)
     List<AdminReqUsers> getAllAdmins();
+
+    //get user by token
+    UserModel findByToken(String token);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
