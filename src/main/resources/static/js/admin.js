@@ -1,4 +1,4 @@
-//call from homepage
+//call from homepage index.html
 const adminBtn = document.querySelector("#adminBtn");
 
 if(adminBtn != null){

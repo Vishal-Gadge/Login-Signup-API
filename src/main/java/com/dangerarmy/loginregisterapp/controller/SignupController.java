@@ -36,15 +36,17 @@ public class SignupController {
     @PostMapping("/req/signup/save")
     public ResponseEntity<String> signup(@RequestBody UserModel user){
 
+        String verificationToken = "fim";
+
         Optional<UserModel> existingAppUser = userRepo.findByEmail(user.getEmail());
         if(existingAppUser.isPresent()){
             if(existingAppUser.orElseThrow().isVerified()){
                 return new ResponseEntity<>("User Already exist and Verified.", HttpStatus.BAD_REQUEST);
             }else{
                 //token creation
-                byte[] bytes = new byte[8];
-                new SecureRandom().nextBytes(bytes);
-                String verificationToken = HexFormat.of().formatHex(bytes);
+//                byte[] bytes = new byte[8];
+//                new SecureRandom().nextBytes(bytes);
+//                String verificationToken = HexFormat.of().formatHex(bytes);
                 existingAppUser.orElseThrow().setToken(verificationToken);
                 userRepo.save(existingAppUser.orElseThrow());
                 //send Email code
@@ -53,9 +55,9 @@ public class SignupController {
             }
         }
         user.setPassword(encoder12.encode(user.getPassword()));
-        byte[] bytes = new byte[8];
-        new SecureRandom().nextBytes(bytes);
-        String verificationToken = HexFormat.of().formatHex(bytes);
+//        byte[] bytes = new byte[8];
+//        new SecureRandom().nextBytes(bytes);
+//        String verificationToken = HexFormat.of().formatHex(bytes);
         user.setToken(verificationToken);
         UserModel dbuser = userRepo.save(user);
         //send email code

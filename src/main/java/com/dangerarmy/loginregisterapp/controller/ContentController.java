@@ -9,12 +9,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 //to show html forms only
-
 @Controller
 public class ContentController {
-
-    @Autowired
-    private LoginService loginService;
     
     @GetMapping("/req/login")
     public String login(){
@@ -41,21 +37,6 @@ public class ContentController {
 
     @GetMapping("/admin/showAdminPanel")
     public String showAdminPanel(){
-        return "admin.html";
-    }
-
-    @GetMapping("/verify/email")
-    public String verifyEmail(@RequestParam String token){
-        if(loginService.verifyEmail(token)){
-            System.out.println("email has been verified");
-            return "login";
-        }
-        return "signup";
-    }
-
-    //loading screen after signup
-    @GetMapping("/loading")
-    public String loadingScreen(){
-        return "loading";
+        return "admin";
     }
 }

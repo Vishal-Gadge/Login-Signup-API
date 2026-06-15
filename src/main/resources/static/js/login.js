@@ -13,12 +13,16 @@ if(loginBtn != null){
             credentials:'include'
         });
 
+        const data = await response.json();
+
         if(response.ok){
-            console.log("Login successful");
             window.location.href = '/';        
+        }else if(response.status === 403){
+            //email not verified so resend email
+            alert(data.error);
         }else{
-            console.error("Invalid Credentials");
-            alert("Invalid Credentials");
+            console.error(data.error);
+            alert(data.error);
         }
     })
 }

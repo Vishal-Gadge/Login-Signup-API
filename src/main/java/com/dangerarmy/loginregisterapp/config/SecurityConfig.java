@@ -40,7 +40,7 @@ public class SecurityConfig {
                                             "/req/login/**","/req/login/verify","/favicon.ico","/test","/verify/email",
                                              "/req/logout","/html/logout.html","/test/**",
                                              "/req/forgotPass","/html/forgotPass.html","/redis-test",
-											 "/css/**","/js/**","/images/**","/static/**")
+											 "/css/**","/js/**","/images/**","/static/**","/html/**")
                                 .permitAll();
                         auth.requestMatchers("/admin/**").hasRole("ADMIN");
                         auth.anyRequest().authenticated();

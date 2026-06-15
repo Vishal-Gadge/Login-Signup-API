@@ -6,6 +6,7 @@ import java.util.Map;
 import com.dangerarmy.loginregisterapp.dto.LoginRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpHeaders;
@@ -32,6 +33,10 @@ public class LoginController {
 
         if(dbUser == null){
             return ResponseEntity.status(401).body(Map.of("error","Invalid credentials"));
+        }
+
+        if(!dbUser.isVerified()){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error","Email is not verified"));
         }
 
         String jwt = jwtService.generateToken(dbUser);

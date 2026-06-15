@@ -20,10 +20,13 @@ public class LoginService {
 
     public UserModel verifyAndGetUser(String email , String password) {
         UserModel user = userRepo.findByEmail(email).orElse(null);
-        if (user != null && encoder12.matches(password , user.getPassword())) {
+        if (user == null){
+            return null;
+        }
+        if (encoder12.matches(password , user.getPassword())) {
             return user;
         }
-        return null;
+        return user;
     }
 
     public boolean verifyEmail(String token){
@@ -32,6 +35,7 @@ public class LoginService {
             dbuser.setVerified(true);
             dbuser.setToken(null);
             userRepo.save(dbuser);
+            return true;
         }
         return false;
     }

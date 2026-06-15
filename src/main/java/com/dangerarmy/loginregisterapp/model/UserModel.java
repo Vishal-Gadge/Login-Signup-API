@@ -1,10 +1,6 @@
 package com.dangerarmy.loginregisterapp.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -17,10 +13,18 @@ public class UserModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(name = "username")
     private String username;
+
+    @Column(name = "email")
     private String email;
+
+    @Column(name = "password")
     private String password;
 
+    @Column(name = "isVerified")
     private boolean isVerified = false;
+
+    @Column(name = "token")
     private String token;
 }

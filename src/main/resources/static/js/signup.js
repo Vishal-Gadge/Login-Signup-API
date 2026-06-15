@@ -24,17 +24,26 @@ if(signupBtn != null){
             return;
         }
 
+        let signupBtnDiv = document.getElementById('signupBtnDiv');
+        signupBtnDiv.innerHTML = "<p>Generating a Verification link...</p>";
+        
         const response = await fetch(baseUrl+"/req/signup/save" , {
             method:"POST",
             headers:{"Content-Type":"application/json"},
             body:JSON.stringify(userDetails)
         })
 
+        signupBtnDiv.innerHTML = `<button id="signupBtn" type="submit">Sign up</button>`;
+
+        //to do values null no mater what response
+
         if(response.ok){
-            console.log("User Saved");
+            alert(`User saved and verification link has been sent to email ${userDetails.email}`);
             window.location.href = "/req/login";
         }else{
             console.error("Signup failed");
+            alert("Signup failed and email was not verified");
+            window.location.href = "/req/signup";
         }
     })
 }

@@ -1,7 +1,12 @@
 package com.dangerarmy.loginregisterapp.service;
 
+import com.dangerarmy.loginregisterapp.exception.InvalidTokenException;
+import com.dangerarmy.loginregisterapp.exception.UserAlreadyVerifiedException;
+import com.dangerarmy.loginregisterapp.model.UserModel;
+import com.dangerarmy.loginregisterapp.repo.UserRepo;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -15,12 +20,15 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
+    @Autowired
+    private UserRepo userRepo;
+
     @Value("${spring.mail.username}")
     private String from;
 
     public void sendVerificationEmail(String email , String verificationToken){
         String subject = "Email verification";
-        String path = "/verify/email";
+        String path = "/html/verifyEmail.html";
         String message = "Click the button below to verify your email address:";
         sendEmail(email,verificationToken,subject,path,message);
     }
@@ -56,5 +64,23 @@ public class EmailService {
         } catch (MessagingException e) {
             throw new RuntimeException("Failed to send email: "+e.getMessage());
         }
+    }
+
+
+    //http://localhost:8080/html/verifyEmail.html?token=fim
+    //Email controller work
+    @Transactional
+    public void verifyEmail(String token) {
+            UserModel dbuser = userRepo.findByToken(token);
+            if(dbuser == null){
+                throw new InvalidTokenException("verification link is invalid");
+            }
+            if(dbuser.isVerified()){
+                throw new UserAlreadyVerifiedException("Email is already verified");
+            }
+            dbuser.setVerified(true);
+            dbuser.setToken(null);
+            userRepo.save(dbuser);
+
     }
 }
