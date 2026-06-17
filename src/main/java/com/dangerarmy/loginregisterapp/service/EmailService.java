@@ -1,9 +1,11 @@
 package com.dangerarmy.loginregisterapp.service;
 
+import com.dangerarmy.loginregisterapp.exception.ExpiredTokenException;
 import com.dangerarmy.loginregisterapp.exception.InvalidTokenException;
 import com.dangerarmy.loginregisterapp.exception.UserAlreadyVerifiedException;
-import com.dangerarmy.loginregisterapp.model.UserModel;
+import com.dangerarmy.loginregisterapp.model.VerifyUser;
 import com.dangerarmy.loginregisterapp.repo.UserRepo;
+import com.dangerarmy.loginregisterapp.repo.VerifyUserRepo;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.transaction.Transactional;
@@ -14,6 +16,8 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.util.Date;
+
 @Service
 public class EmailService {
 
@@ -22,6 +26,9 @@ public class EmailService {
 
     @Autowired
     private UserRepo userRepo;
+
+    @Autowired
+    private VerifyUserRepo verifyUserRepo;
 
     @Value("${spring.mail.username}")
     private String from;
@@ -71,16 +78,28 @@ public class EmailService {
     //Email controller work
     @Transactional
     public void verifyEmail(String token) {
-            UserModel dbuser = userRepo.findByToken(token);
-            if(dbuser == null){
+            VerifyUser dbVerifyUser = verifyUserRepo.findByToken(token);
+            if(dbVerifyUser == null){
                 throw new InvalidTokenException("verification link is invalid");
             }
-            if(dbuser.isVerified()){
+            if(dbVerifyUser.isVerified()){
                 throw new UserAlreadyVerifiedException("Email is already verified");
             }
-            dbuser.setVerified(true);
-            dbuser.setToken(null);
-            userRepo.save(dbuser);
+            if(dbVerifyUser.getExpiresAt().before(new Date(System.currentTimeMillis()))){
+                throw new ExpiredTokenException("Token has been expired");
+            }
+            dbVerifyUser.setVerified(true);
+            dbVerifyUser.setToken(null);
+            dbVerifyUser.setExpiresAt(null);
+            verifyUserRepo.save(dbVerifyUser);
 
+    }
+
+    //signup controller method
+    public boolean isValidEmail(String email) {
+        if(email.endsWith("@gmail.com")){
+            return true;
+        }
+        return false;
     }
 }

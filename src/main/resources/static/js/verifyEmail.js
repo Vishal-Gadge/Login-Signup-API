@@ -19,11 +19,11 @@ document.addEventListener('DOMContentLoaded',async (evt) => {
         if(response.ok){  //200
             resultSet.innerHTML = `
                 <p style="color: green;">${result.message}</p>
-                <h4>You will be redirect to login in 10 sec</h4><br>
+                <h4>You will be redirect to login in 5 sec</h4><br>
             `;
             setTimeout(() => {
                 window.location.href = '/req/login';
-            }, 10000);
+            }, 5000);
         }else if(response.status === 400 || response.status === 410){   //InvalidToken or Expired 
             resultSet.innerHTML = `
                 <p style="color: red;">${result.message}</p>
@@ -32,10 +32,10 @@ document.addEventListener('DOMContentLoaded',async (evt) => {
         }else if(response.status === 409){  //UserAlreadyVerifiedException
             resultSet.innerHTML = `
                 <p style="color: orange;">${result.message}</p>
-                <h4>You will be redirect to login in 10 sec</h4><br>;
+                <h4>You will be redirect to login in 5 sec</h4><br>;
                 setTimeout(() => {
                     window.location.href = '/req/login';
-                }, 10000);
+                }, 5000);
             `;
         }else{
             resultSet.innerHTML = `<p style="color: red">Something went wrong</p>`;

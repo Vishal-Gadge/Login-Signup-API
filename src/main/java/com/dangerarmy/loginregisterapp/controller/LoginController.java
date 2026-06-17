@@ -4,6 +4,8 @@ import java.time.Duration;
 import java.util.Map;
 
 import com.dangerarmy.loginregisterapp.dto.LoginRequest;
+import com.dangerarmy.loginregisterapp.model.VerifyUser;
+import com.dangerarmy.loginregisterapp.repo.VerifyUserRepo;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,6 +28,9 @@ public class LoginController {
 
     @Autowired
     private JwtService jwtService;
+
+    @Autowired
+    private VerifyUserRepo verifyUserRepo;
     
     @PostMapping("/req/login/verify")
     public ResponseEntity<?> verifyUserLogin(@RequestBody LoginRequest req, HttpServletResponse response){
@@ -35,7 +40,9 @@ public class LoginController {
             return ResponseEntity.status(401).body(Map.of("error","Invalid credentials"));
         }
 
-        if(!dbUser.isVerified()){
+        VerifyUser dbVerifyUser = verifyUserRepo.findByUserModel(dbUser);
+
+        if(!dbVerifyUser.isVerified()){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error","Email is not verified"));
         }
 

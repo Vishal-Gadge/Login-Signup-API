@@ -1,7 +1,9 @@
 package com.dangerarmy.loginregisterapp.controller;
 
 import com.dangerarmy.loginregisterapp.model.UserRoles;
+import com.dangerarmy.loginregisterapp.model.VerifyUser;
 import com.dangerarmy.loginregisterapp.repo.UserRolesRepo;
+import com.dangerarmy.loginregisterapp.repo.VerifyUserRepo;
 import com.dangerarmy.loginregisterapp.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,7 +17,9 @@ import com.dangerarmy.loginregisterapp.model.UserModel;
 import com.dangerarmy.loginregisterapp.repo.UserRepo;
 
 import java.security.SecureRandom;
+import java.util.Date;
 import java.util.HexFormat;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -28,41 +32,59 @@ public class SignupController {
     private UserRolesRepo userRolesRepo;
 
     @Autowired
+    private VerifyUserRepo verifyUserRepo;
+
+    @Autowired
     private PasswordEncoder encoder12;
 
     @Autowired
     private EmailService emailService;
 
     @PostMapping("/req/signup/save")
-    public ResponseEntity<String> signup(@RequestBody UserModel user){
+    public ResponseEntity<Map<String, String>> signup(@RequestBody UserModel user){
 
-        String verificationToken = "fim";
+        //valid email checkup
+        if(!emailService.isValidEmail(user.getEmail())){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error","Email is not valid."));
+        }
 
         Optional<UserModel> existingAppUser = userRepo.findByEmail(user.getEmail());
         if(existingAppUser.isPresent()){
-            if(existingAppUser.orElseThrow().isVerified()){
-                return new ResponseEntity<>("User Already exist and Verified.", HttpStatus.BAD_REQUEST);
+            VerifyUser verifyUser = verifyUserRepo.findByUserModel(existingAppUser.orElseThrow());
+            if(verifyUser.isVerified()){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error","User Already exist and Verified."));
             }else{
-                //token creation
-//                byte[] bytes = new byte[8];
-//                new SecureRandom().nextBytes(bytes);
-//                String verificationToken = HexFormat.of().formatHex(bytes);
-                existingAppUser.orElseThrow().setToken(verificationToken);
+                byte[] bytes = new byte[8];
+                new SecureRandom().nextBytes(bytes);
+                String verificationToken = HexFormat.of().formatHex(bytes);
+
+                verifyUser.setToken(verificationToken);
+                verifyUser.setExpiresAt(new Date(System.currentTimeMillis()+1000*60*10));
+                verifyUserRepo.save(verifyUser);
+
                 userRepo.save(existingAppUser.orElseThrow());
-                //send Email code
+
                 emailService.sendVerificationEmail(existingAppUser.orElseThrow().getEmail(), verificationToken);
-                return new ResponseEntity<>("Verification Email resent, Check your inbox",HttpStatus.OK);
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(Map.of("message","Verification Email resent, Check your inbox"));
             }
         }
         user.setPassword(encoder12.encode(user.getPassword()));
-//        byte[] bytes = new byte[8];
-//        new SecureRandom().nextBytes(bytes);
-//        String verificationToken = HexFormat.of().formatHex(bytes);
-        user.setToken(verificationToken);
+
+        byte[] bytes = new byte[8];
+        new SecureRandom().nextBytes(bytes);
+        String verificationToken = HexFormat.of().formatHex(bytes);
+
         UserModel dbuser = userRepo.save(user);
-        //send email code
-        emailService.sendVerificationEmail(user.getEmail() , verificationToken);
         userRolesRepo.save(new UserRoles(null,dbuser,"USER"));
-        return new ResponseEntity<>("Signup successful, check email",HttpStatus.CREATED);
+
+        emailService.sendVerificationEmail(user.getEmail() , verificationToken);
+
+        VerifyUser verifyUser = new VerifyUser(dbuser,verificationToken);
+        verifyUserRepo.save(verifyUser);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(Map.of("message","Signup successful, check email"));
     }
 }

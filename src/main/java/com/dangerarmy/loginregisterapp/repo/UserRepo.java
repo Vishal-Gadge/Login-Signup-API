@@ -50,8 +50,6 @@ public interface UserRepo extends JpaRepository<UserModel,Integer>{
                 nativeQuery = true)
     List<AdminReqUsers> getAllAdmins();
 
-    //get user by token
-    UserModel findByToken(String token);
 }
 
 

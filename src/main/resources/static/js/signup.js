@@ -37,12 +37,16 @@ if(signupBtn != null){
 
         //to do values null no mater what response
 
+        const result = await response.json();
+
+        console.log(result);
+        console.log(response);
         if(response.ok){
             alert(`User saved and verification link has been sent to email ${userDetails.email}`);
             window.location.href = "/req/login";
         }else{
-            console.error("Signup failed");
-            alert("Signup failed and email was not verified");
+            console.error("Signup failed : "+result.error);
+            alert(result.error);
             window.location.href = "/req/signup";
         }
     })

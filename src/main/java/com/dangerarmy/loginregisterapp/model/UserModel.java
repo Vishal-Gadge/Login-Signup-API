@@ -22,9 +22,9 @@ public class UserModel {
     @Column(name = "password")
     private String password;
 
-    @Column(name = "isVerified")
-    private boolean isVerified = false;
-
-    @Column(name = "token")
-    private String token;
+//    @Column(name = "isVerified")
+//    private boolean isVerified = false;
+//
+//    @Column(name = "token")
+//    private String token;
 }

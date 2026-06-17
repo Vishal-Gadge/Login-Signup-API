@@ -15,7 +15,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-public class EmailController {
+public class VerifyEmailController {
 
     private final EmailService emailService;
 
@@ -26,7 +26,7 @@ public class EmailController {
             //System.out.println(emailService.verifyEmail(token));
             emailService.verifyEmail(token);
             return ResponseEntity.ok()
-                    .body(Map.of("message","Email has been verified , Go Login"));
+                    .body(Map.of("message","Email has been verified"));
         } catch (InvalidTokenException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("message",e.getMessage()));
