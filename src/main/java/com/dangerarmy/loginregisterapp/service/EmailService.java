@@ -1,8 +1,7 @@
 package com.dangerarmy.loginregisterapp.service;
 
-import com.dangerarmy.loginregisterapp.exception.ExpiredTokenException;
-import com.dangerarmy.loginregisterapp.exception.InvalidTokenException;
-import com.dangerarmy.loginregisterapp.exception.UserAlreadyVerifiedException;
+import com.dangerarmy.loginregisterapp.exception.*;
+import com.dangerarmy.loginregisterapp.model.UserModel;
 import com.dangerarmy.loginregisterapp.model.VerifyUser;
 import com.dangerarmy.loginregisterapp.repo.UserRepo;
 import com.dangerarmy.loginregisterapp.repo.VerifyUserRepo;
@@ -11,12 +10,18 @@ import jakarta.mail.internet.MimeMessage;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
+import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.security.SecureRandom;
 import java.util.Date;
+import java.util.HexFormat;
+import java.util.Optional;
 
 @Service
 public class EmailService {
@@ -68,8 +73,10 @@ public class EmailService {
             helper.setFrom(from);
             helper.setText(content, true);
             mailSender.send(mimeMessage);
+        }catch (MailException e){
+            throw new UnknownHostException("Email Service unavailable, Try again later");
         } catch (MessagingException e) {
-            throw new RuntimeException("Failed to send email: "+e.getMessage());
+            throw new RuntimeException("Email was not created",e);
         }
     }
 
@@ -92,14 +99,61 @@ public class EmailService {
             dbVerifyUser.setToken(null);
             dbVerifyUser.setExpiresAt(null);
             verifyUserRepo.save(dbVerifyUser);
-
+            verifyUserRepo.flush();
     }
 
-    //signup controller method
-    public boolean isValidEmail(String email) {
-        if(email.endsWith("@gmail.com")){
-            return true;
+
+    public void resendEmail(String email) throws MailSendException  {
+        Optional<UserModel> dbuser = userRepo.findByEmail(email);
+        if(dbuser.isEmpty()) {
+            throw new UsernameNotFoundException("User not found , Go signup first");
         }
-        return false;
+
+        VerifyUser verifyUser = verifyUserRepo.findByUserModel(dbuser.orElseThrow());
+        if(verifyUser == null){
+            verifyUser = new VerifyUser();
+            verifyUser.setUserModel(dbuser.orElseThrow());
+        }
+
+        if(verifyUser.isVerified()){
+            throw new UserAlreadyVerifiedException("User already verified");
+        }
+
+        //token present just expired
+        if(verifyUser.getExpiresAt().after(new Date(System.currentTimeMillis()))){
+            System.out.println("token preset just expired, so just send token again with new expiration");
+            sendVerificationEmail(email,verifyUser.getToken());
+            verifyUser.setExpiresAt(new Date(System.currentTimeMillis()+(1000*60*10)));
+            verifyUserRepo.save(verifyUser);
+        }else{
+            //if all set then should run
+            String token = generateToken();
+            sendVerificationEmail(email,token);
+
+            verifyUser.setExpiresAt(new Date(System.currentTimeMillis()+(1000*60*10)));
+            verifyUser.setToken(token);
+            verifyUser.setVerified(false);
+            verifyUserRepo.save(verifyUser);
+        }
+    }
+
+    //utility method
+    public void isValidEmail(String email) {
+
+        if(email == null){
+            throw  new InvalidEmailException("Email is null");
+        }
+
+        email = email.trim().toLowerCase();
+
+        if(!email.endsWith("@gmail.com")){
+            throw new InvalidEmailException("Email is not valid");
+        }
+    }
+
+    public String generateToken(){
+        byte[] bytes = new byte[8];
+        new SecureRandom().nextBytes(bytes);
+        return HexFormat.of().formatHex(bytes);
     }
 }

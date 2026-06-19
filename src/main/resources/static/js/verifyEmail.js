@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded',async (evt) => {
         }else if(response.status === 400 || response.status === 410){   //InvalidToken or Expired 
             resultSet.innerHTML = `
                 <p style="color: red;">${result.message}</p>
-                <a href="/resend-verification">Resend verification email</a>
+                <a href="/html/resend-verification.html">Resend verification email</a>
             `;
         }else if(response.status === 409){  //UserAlreadyVerifiedException
             resultSet.innerHTML = `

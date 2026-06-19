@@ -5,6 +5,8 @@ import com.dangerarmy.loginregisterapp.model.VerifyUser;
 import com.dangerarmy.loginregisterapp.repo.UserRolesRepo;
 import com.dangerarmy.loginregisterapp.repo.VerifyUserRepo;
 import com.dangerarmy.loginregisterapp.service.EmailService;
+import jakarta.mail.MessagingException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,42 +25,32 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
+@RequiredArgsConstructor
 public class SignupController {
 
-    @Autowired
-    private UserRepo userRepo;
-
-    @Autowired
-    private UserRolesRepo userRolesRepo;
-
-    @Autowired
-    private VerifyUserRepo verifyUserRepo;
-
-    @Autowired
-    private PasswordEncoder encoder12;
-
-    @Autowired
-    private EmailService emailService;
+    private final UserRepo userRepo;
+    private final UserRolesRepo userRolesRepo;
+    private final VerifyUserRepo verifyUserRepo;
+    private final PasswordEncoder encoder12;
+    private final EmailService emailService;
 
     @PostMapping("/req/signup/save")
     public ResponseEntity<Map<String, String>> signup(@RequestBody UserModel user){
 
         //valid email checkup
-        if(!emailService.isValidEmail(user.getEmail())){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error","Email is not valid."));
-        }
+        emailService.isValidEmail(user.getEmail());
 
         Optional<UserModel> existingAppUser = userRepo.findByEmail(user.getEmail());
         if(existingAppUser.isPresent()){
             VerifyUser verifyUser = verifyUserRepo.findByUserModel(existingAppUser.orElseThrow());
+            if(verifyUser == null){
+                verifyUser = new VerifyUser(existingAppUser.orElseThrow(), emailService.generateToken());
+            }
             if(verifyUser.isVerified()){
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(Map.of("error","User Already exist and Verified."));
             }else{
-                byte[] bytes = new byte[8];
-                new SecureRandom().nextBytes(bytes);
-                String verificationToken = HexFormat.of().formatHex(bytes);
+                String verificationToken = emailService.generateToken();
 
                 verifyUser.setToken(verificationToken);
                 verifyUser.setExpiresAt(new Date(System.currentTimeMillis()+1000*60*10));
@@ -67,15 +59,14 @@ public class SignupController {
                 userRepo.save(existingAppUser.orElseThrow());
 
                 emailService.sendVerificationEmail(existingAppUser.orElseThrow().getEmail(), verificationToken);
+
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(Map.of("message","Verification Email resent, Check your inbox"));
             }
         }
         user.setPassword(encoder12.encode(user.getPassword()));
 
-        byte[] bytes = new byte[8];
-        new SecureRandom().nextBytes(bytes);
-        String verificationToken = HexFormat.of().formatHex(bytes);
+        String verificationToken = emailService.generateToken();
 
         UserModel dbuser = userRepo.save(user);
         userRolesRepo.save(new UserRoles(null,dbuser,"USER"));

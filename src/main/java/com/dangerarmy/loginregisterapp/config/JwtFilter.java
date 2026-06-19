@@ -42,6 +42,9 @@ public class JwtFilter extends OncePerRequestFilter {
                 path.startsWith("/verify/email") ||
                 path.startsWith("/html/verifyEmail.html") ||
                 path.equals("/req/signup/save") ||
+                path.equals("/resend-verification") ||
+                path.equals("/resend-email") ||
+                path.equals("/html/resend-verification.html") ||
                 path.equals("/req/login") ||
                 path.equals("/req/login/verify") ||
                 path.equals("/req/login.html") ||
