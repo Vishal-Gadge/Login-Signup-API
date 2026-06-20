@@ -56,9 +56,16 @@ const resendEmailBtn = document.getElementById('resendEmailButton');
 if(resendEmailBtn !== null){
     resendEmailBtn.addEventListener('click', async (evt) => {
         evt.preventDefault();
-        
         const resendEmail = document.getElementById('resendVerificationEmail').value;
+        const resultSet = document.getElementById('resultSet');
 
+        if(resendEmail === ""){
+            resultSet.innerHTML = `<p style="color: red;">Email is Empty</p>`;
+            return;
+        }
+
+        resultSet.innerHTML = `<p style="color: orange">Email Sending process is running , Please wait patiently...</p>`;
+        
         const response = await fetch("/resend-email",{
             method:"POST",
             headers:{"Content-Type":"application/json"},
@@ -66,12 +73,13 @@ if(resendEmailBtn !== null){
         })
 
         const result = await response.json();
+        console.log(result.message);
 
         if(response.ok){
-            alert(result.message);
+            resultSet.innerHTML = `<p style="color: green;">${result.message}</p>`;
         }else{
             console.error(result.message);
-            alert(result.message);
+            resultSet.innerHTML = `<p style="color: red;">${result.message}</p>`;
         }
     })
 }

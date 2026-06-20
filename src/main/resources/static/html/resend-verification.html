@@ -8,13 +8,29 @@
         *{
             background-color: cyan;
             padding: 10px;
+            margin: 5px;
+            font-size: 1rem;
+        }
+        input{
+            width: 250px;
+            text-decoration: none;
+            border:1px solid black;
+        }
+        button{
+            width: 100px;
+            border-radius: 10px;
+            text-decoration: none;
+            border: 1px solid black;
+            margin-left: 7%;
         }
     </style>
 </head>
 <body>
-    <h1>Resend verification</h1>
-    <input type="email" placeholder="JohnDoe123@gmail.com" id="resendVerificationEmail">
-    <button type="button" id="resendEmailButton">Send Link</button>
+    <h1 style="font-size: 1.3rem;">Resend verification</h1>
+    <div id="resultSet">
+        <input type="email" placeholder="JohnDoe123@gmail.com" id="resendVerificationEmail"><br>
+        <button type="button" id="resendEmailButton">Send Link</button>
+    </div>
 
 <script src="/js/signup.js"></script>
 </body>

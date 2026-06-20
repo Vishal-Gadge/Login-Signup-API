@@ -46,6 +46,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("message","Email is not valid"));
     }
+
+    @ExceptionHandler(ExpiredEmailException.class)
+    public ResponseEntity<?> handleExpiredEmail(ExpiredEmailException e){
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(Map.of("message",e.getMessage()));
+    }
 }
 
 

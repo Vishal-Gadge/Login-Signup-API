@@ -8,8 +8,10 @@ import com.dangerarmy.loginregisterapp.repo.VerifyUserRepo;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -19,6 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.security.SecureRandom;
+import java.security.Timestamp;
+import java.time.Duration;
 import java.util.Date;
 import java.util.HexFormat;
 import java.util.Optional;
@@ -34,6 +38,9 @@ public class EmailService {
 
     @Autowired
     private VerifyUserRepo verifyUserRepo;
+
+    @Autowired
+    private RedisRateLimiter redisRateLimiter;
 
     @Value("${spring.mail.username}")
     private String from;
@@ -103,7 +110,9 @@ public class EmailService {
     }
 
 
-    public void resendEmail(String email) throws MailSendException  {
+    public void resendEmail(String email){
+        redisRateLimiter.rateLimiter("Resend_Email_attempts_"+email,Duration.ofMinutes(10));
+
         Optional<UserModel> dbuser = userRepo.findByEmail(email);
         if(dbuser.isEmpty()) {
             throw new UsernameNotFoundException("User not found , Go signup first");
