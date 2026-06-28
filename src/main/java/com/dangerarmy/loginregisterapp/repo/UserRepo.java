@@ -49,7 +49,6 @@ public interface UserRepo extends JpaRepository<UserModel,Integer>{
     @Query(value ="SELECT u.id,u.username,u.email FROM user_model u JOIN user_roles r ON u.id=r.user_id where r.roles = 'ADMIN'",
                 nativeQuery = true)
     List<AdminReqUsers> getAllAdmins();
-
 }
 
 

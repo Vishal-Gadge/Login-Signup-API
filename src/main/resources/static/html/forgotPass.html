@@ -11,31 +11,47 @@
 <body>
 <section>
     <form id="forgotPassForm">
-        <h1>Forgot Password</h1>
-        <div class="inputbox">
-            <ion-icon name="person-outline"></ion-icon>
-            <input type="text" id="username">
-            <label for="">Enter username</label>
+        <div id="step1">
+            <h1>Forgot Password</h1>
+            <div class="inputbox">
+                <ion-icon name="mail-outline"></ion-icon>
+                <input type="email" id="email">
+                <label for="">Enter email</label>
+            </div>
+            <div class="inputbox">
+                <ion-icon name="lock-closed-outline"></ion-icon>
+                <input type="password" id="password">
+                <label for="">Enter Password</label>
+            </div>
+            <div class="inputbox">
+                <ion-icon name="lock-closed-outline"></ion-icon>
+                <input type="password" id="confirmPass">
+                <label for="">Confirm password</label>
+            </div>
+        
+            <button id="forgotPassBtn" type="button">
+                <span id="forgotPassText">Send OTP</span>
+                <span id="forgotPassSpinner" style="display: none;">⏳</span>
+            </button>
         </div>
-        <div class="inputbox">
-            <ion-icon name="mail-outline"></ion-icon>
-            <input type="email" id="email">
-            <label for="">Enter email</label>
+
+        <div id="step2" style="display: none;">
+            <h1>Verify OTP</h1>
+            <div class="inputbox">
+                <ion-icon name="lock-closed-outline"></ion-icon>
+                <input type="number" id="forgotPassOtp">
+                <label for="">Enter OTP</label>
+            </div>
+            <button id="changePassBtn" type="button">
+                <span id="changePassText">Change Password</span>
+                <span id="changePassSpinner" style="display: none;">⏳</span>
+            </button>
         </div>
-        <div class="inputbox">
-            <ion-icon name="lock-closed-outline"></ion-icon>
-            <input type="password" id="password">
-            <label for="">Enter Password</label>
-        </div>
-        <div class="inputbox">
-            <ion-icon name="lock-closed-outline"></ion-icon>
-            <input type="password" id="confirmPass">
-            <label for="">Confirm password</label>
-        </div>
-        <button id="forgotPassBtn" type="button">Change Password</button>
+        <br>
+        <div id="showResult" style="display: none;"></div>
     </form>
 </section>
-<script src="/js/forgotPass.js" defer></script>
-<script src="/js/styleJs.js" defer></script>
+<script src="/js/forgotPass.js"></script>
+<script src="/js/styleJs.js"></script>
 </body>
 </html>

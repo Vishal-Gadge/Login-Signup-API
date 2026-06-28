@@ -3,7 +3,7 @@ package com.dangerarmy.loginregisterapp.controller;
 import java.time.Duration;
 import java.util.Map;
 
-import com.dangerarmy.loginregisterapp.dto.LoginRequest;
+import com.dangerarmy.loginregisterapp.dto.UserRequest;
 import com.dangerarmy.loginregisterapp.model.VerifyUser;
 import com.dangerarmy.loginregisterapp.repo.VerifyUserRepo;
 import jakarta.servlet.http.HttpServletResponse;
@@ -33,7 +33,7 @@ public class LoginController {
     private VerifyUserRepo verifyUserRepo;
     
     @PostMapping("/req/login/verify")
-    public ResponseEntity<?> verifyUserLogin(@RequestBody LoginRequest req, HttpServletResponse response){
+    public ResponseEntity<?> verifyUserLogin(@RequestBody UserRequest req, HttpServletResponse response){
         UserModel dbUser = loginService.verifyAndGetUser(req.getEmail(), req.getPassword());
 
         if(dbUser == null){

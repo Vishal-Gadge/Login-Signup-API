@@ -9,11 +9,8 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.MailException;
-import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,26 +18,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.security.SecureRandom;
-import java.security.Timestamp;
 import java.time.Duration;
 import java.util.Date;
 import java.util.HexFormat;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class EmailService {
 
-    @Autowired
-    private JavaMailSender mailSender;
-
-    @Autowired
-    private UserRepo userRepo;
-
-    @Autowired
-    private VerifyUserRepo verifyUserRepo;
-
-    @Autowired
-    private RedisRateLimiter redisRateLimiter;
+    private final JavaMailSender mailSender;
+    private final UserRepo userRepo;
+    private final VerifyUserRepo verifyUserRepo;
+    private final RedisRateLimiter redisRateLimiter;
 
     @Value("${spring.mail.username}")
     private String from;
@@ -87,6 +77,38 @@ public class EmailService {
         }
     }
 
+    public void sendVerificationOtp(String email , String otp){
+        String subject = "Forgot Password Verification";
+        String message = "Enter this OTP to verify its you";
+        sendOtp(email, otp , subject, message);
+    }
+
+    public void sendOtp(String email, String otp , String subject , String message){
+        try {
+            String content = """
+                        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px;\s
+                        border-radius: 8px; background-color: #f9f9f9; text-align: center;">
+                            <h2 style="color: #333;">%s</h2>
+                            <p style="font-size: 16px; color: #555;">%s</p>
+                            <p style="font-size: 16px; color: #555;">%s</p>
+                            <p style="font-size: 12px; color: #aaa;">This is an automated message. Please do not reply.</p>
+                        </div>
+                   \s""".formatted(subject,message,otp);
+
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+
+            helper.setTo(email);
+            helper.setSubject(subject);
+            helper.setFrom(from);
+            helper.setText(content, true);
+            mailSender.send(mimeMessage);
+        } catch (MailException e){
+            throw new UnknownHostException("Email Service unavailable, Try again later");
+        } catch (MessagingException e) {
+            throw new RuntimeException("Email was not created",e);
+        }
+    }
 
     //http://localhost:8080/html/verifyEmail.html?token=fim
     //Email controller work
@@ -111,7 +133,7 @@ public class EmailService {
 
 
     public void resendEmail(String email){
-        redisRateLimiter.rateLimiter("Resend_Email_attempts_"+email,Duration.ofMinutes(10));
+        redisRateLimiter.rateLimiter("Resend_Email_attempts_"+email,3,Duration.ofSeconds(600));
 
         Optional<UserModel> dbuser = userRepo.findByEmail(email);
         if(dbuser.isEmpty()) {
@@ -148,7 +170,6 @@ public class EmailService {
 
     //utility method
     public void isValidEmail(String email) {
-
         if(email == null){
             throw  new InvalidEmailException("Email is null");
         }

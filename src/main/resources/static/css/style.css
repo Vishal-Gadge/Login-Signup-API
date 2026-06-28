@@ -80,7 +80,7 @@ input:focus ~ label,
 input:valid ~ label {
     top : -5px;
     font-size: 0.9rem;
-    color:#a8a8a8;
+    color:#000000;
 }
 
 button{

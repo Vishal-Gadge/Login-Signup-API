@@ -44,12 +44,35 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidEmailException.class)
     public ResponseEntity<Map<String, String>> handleInvalidEmail(InvalidEmailException e){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("message","Email is not valid"));
+                .body(Map.of("message",e.getMessage()));
     }
 
     @ExceptionHandler(ExpiredEmailException.class)
     public ResponseEntity<?> handleExpiredEmail(ExpiredEmailException e){
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(Map.of("message",e.getMessage()));
+    }
+
+    @ExceptionHandler(WeakPasswordException.class)
+    public ResponseEntity<?> handleWeakPassword(WeakPasswordException e){
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
+                .body(Map.of("message",e.getMessage()));
+    }
+
+    @ExceptionHandler(RateLimitExceededException.class)
+    public ResponseEntity<?> handleRateLimitExceeded(RateLimitExceededException e){
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(Map.of("message",e.getMessage()));
+    }
+
+
+
+
+    //Common exceptions handled
+
+    @ExceptionHandler(InvalidException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidException(InvalidException e){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("message",e.getMessage()));
     }
 }

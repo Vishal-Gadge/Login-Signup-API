@@ -10,5 +10,4 @@ public interface VerifyUserRepo extends JpaRepository<VerifyUser, Integer> {
 
     VerifyUser findByToken(String token);
     VerifyUser findByUserModel(UserModel userModel);
-
 }

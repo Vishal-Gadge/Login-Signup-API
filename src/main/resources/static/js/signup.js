@@ -45,7 +45,7 @@ if(signupBtn != null){
         }else{
             console.error("Signup failed : "+result.message);
             alert(result.message);
-            window.location.href = "/req/signup";
+            // window.location.href = "/req/signup";
         }
     })
 }

@@ -49,8 +49,11 @@ public class JwtFilter extends OncePerRequestFilter {
                 path.equals("/req/login/verify") ||
                 path.equals("/req/login.html") ||
                 path.equals("/req/logout") ||
+
                 path.equals("/html/forgotPass.html") ||
                 path.equals("/req/forgotPass") ||
+                path.equals("/verify/forgotPass") ||
+
                 path.equals("/redis-test");
     }
 

@@ -39,7 +39,7 @@ public class SecurityConfig {
                         auth.requestMatchers("/req/signup", "/req/login","/req/signup/save",
                                             "/req/login/**","/req/login/verify","/favicon.ico","/test","/verify/email",
                                              "/req/logout","/html/logout.html","/test/**",
-                                             "/req/forgotPass","/html/forgotPass.html","/redis-test",
+                                             "/req/forgotPass","/verify/forgotPass","/html/forgotPass.html","/redis-test",
                                              "/html/resend-verification.html","/resend-email",
 											 "/css/**","/js/**","/images/**","/static/**","/html/**","/favicon.ico")
                                 .permitAll();

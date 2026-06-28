@@ -41,6 +41,7 @@ public class SignupController {
         emailService.isValidEmail(user.getEmail());
 
         Optional<UserModel> existingAppUser = userRepo.findByEmail(user.getEmail());
+        System.out.println(existingAppUser.isPresent());
         if(existingAppUser.isPresent()){
             VerifyUser verifyUser = verifyUserRepo.findByUserModel(existingAppUser.orElseThrow());
             if(verifyUser == null){
@@ -68,7 +69,8 @@ public class SignupController {
 
         String verificationToken = emailService.generateToken();
 
-        UserModel dbuser = userRepo.save(user);
+        UserModel dbuser = userRepo.saveAndFlush(user);
+        System.out.println("Saved user id: "+dbuser.getId());
         userRolesRepo.save(new UserRoles(null,dbuser,"USER"));
 
         emailService.sendVerificationEmail(user.getEmail() , verificationToken);

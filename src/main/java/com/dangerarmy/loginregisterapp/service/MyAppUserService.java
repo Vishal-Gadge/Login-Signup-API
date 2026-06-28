@@ -47,31 +47,31 @@ public class MyAppUserService implements UserDetailsService{
         return new MyUserDetailsModel(user,roles);
     }
 
-    @Transactional
-    public void updatePassword(UserModel userModel){
-        String key = "rate_limit_"+userModel.getEmail();
-        String attemptStr = redisTemplate.opsForValue().get(key);
-        long redisAttempt = attemptStr == null ? 0 : Long.parseLong(attemptStr);
-
-        if (redisAttempt >= 3){
-            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,
-                    "Too many failure requests. Try again after 10 min");
-        }
-
-        String encodedPass = new BCryptPasswordEncoder(12).encode(userModel.getPassword());
-        int rowsUpdated = userRepo.updatePasswordByEmailAndUsername(userModel.getEmail(),
-                userModel.getUsername(),encodedPass);
-
-        if(rowsUpdated == 0){
-            long attempts = redisTemplate.opsForValue().increment(key);
-            if(attempts == 1){
-                redisTemplate.expire(key , Duration.ofMinutes(10));
-            }
-            if(attempts > 3){
-            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,
-                    "Too many failure requests. Try again after 10 min");
-            }
-            throw new UsernameNotFoundException("User not found or username dosen't match email");
-        }
-    }
+//    @Transactional
+//    public void updatePassword(UserModel userModel){
+//        String key = "rate_limit_"+userModel.getEmail();
+//        String attemptStr = redisTemplate.opsForValue().get(key);
+//        long redisAttempt = attemptStr == null ? 0 : Long.parseLong(attemptStr);
+//
+//        if (redisAttempt >= 3){
+//            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,
+//                    "Too many failure requests. Try again after 10 min");
+//        }
+//
+//        String encodedPass = new BCryptPasswordEncoder(12).encode(userModel.getPassword());
+//        int rowsUpdated = userRepo.updatePasswordByEmailAndUsername(userModel.getEmail(),
+//                userModel.getUsername(),encodedPass);
+//
+//        if(rowsUpdated == 0){
+//            long attempts = redisTemplate.opsForValue().increment(key);
+//            if(attempts == 1){
+//                redisTemplate.expire(key , Duration.ofMinutes(10));
+//            }
+//            if(attempts > 3){
+//            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,
+//                    "Too many failure requests. Try again after 10 min");
+//            }
+//            throw new UsernameNotFoundException("User not found or username dosen't match email");
+//        }
+//    }
 }
