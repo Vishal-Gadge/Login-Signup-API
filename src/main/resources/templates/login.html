@@ -25,13 +25,25 @@
             <div class="register">
                 <p><a href="/html/forgotPass.html">Forgot Password ?</a></p>
             </div>
-            <button id="loginBtn">Log in</button>
+
+            <div class="register" id="showResult" 
+                style="display: none; color: red; font-size: 1.1rem; font-weight: 770;">
+            </div>
+            
+            <button id="loginBtn">
+                <span id="loginBtnText">Log in</span>
+                <span id="loginBtnSpinner" style="display: none;">⏳</span>
+            </button>
+            
             <div class="register">
                 <p>Don't have an account? <a href="/req/signup"> Sign up</a></p>
+                <p style="margin-top: 5px;">
+                    Email not verified? 
+                    <a href="/html/resend-verification.html"> Verify Email</a>
+                </p>
             </div>
         </form>
     </section>
-    <script src="/js/styleJs.js" defer></script>
     <script src="/js/login.js"></script>
 </body>
 </html>

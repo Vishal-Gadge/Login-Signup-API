@@ -1,4 +1,3 @@
-const baseUrl = "http://localhost:8080";
 const signupBtn = document.getElementById("signupBtn");
 if(signupBtn != null){
     signupBtn.addEventListener("click" , async (evt) => {
@@ -10,76 +9,75 @@ if(signupBtn != null){
         }
 
         const confPassword = document.getElementById('confirmPassword').value;
+        const showResult = document.getElementById('showResult');
 
+        //empty
         if(userDetails.username.trim() === "" ||
             userDetails.email.trim() === "" ||
             userDetails.password.trim() === "" ||
             confPassword.trim() === ""){
-                alert("Kindly enter details first");
+                showResult.textContent = "Kindly enter details first";
+                showResult.style.display = 'block';
+                setTimeout(() => {
+                    showResult.style.display = 'none';
+                }, 5000);
                 return;
             }
 
+        //not match
         if(userDetails.password !== confPassword){
-            alert("Passwords don't match")
+            showResult.textContent = "Password dosen't match Confirm password";
+            showResult.style.display = 'block';
+            setTimeout(() => {
+                showResult.style.display = 'none';
+            }, 5000);    
             return;
         }
 
-        let signupBtnDiv = document.getElementById('signupBtnDiv');
-        signupBtnDiv.innerHTML = "<p>Generating a Verification link...</p>";
-        
-        const response = await fetch("/req/signup/save" , {
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify(userDetails)
-        })
+        const signupBtnText = document.getElementById('signupBtnText');
+        const signupSpinner = document.getElementById('signupSpinner');
 
-        signupBtnDiv.innerHTML = `<button id="signupBtn" type="submit">Sign up</button>`;
+        try{
+            signupBtn.disabled = true;
+            signupBtnText.textContent = 'Signing up...';
+            signupSpinner.style.display = 'inline';
 
-        //to do values null no mater what response
+            const response = await fetch("/req/signup/save" , {
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify(userDetails)
+            })
 
-        const result = await response.json();
+            const result = await response.json();
 
-        if(response.ok){
-            alert(`User saved and verification link has been sent to email ${userDetails.email}`);
-            window.location.href = "/req/login";
-        }else{
-            console.error("Signup failed : "+result.message);
-            alert(result.message);
-            // window.location.href = "/req/signup";
-        }
-    })
-}
-
-
-//resend email
-const resendEmailBtn = document.getElementById('resendEmailButton');
-if(resendEmailBtn !== null){
-    resendEmailBtn.addEventListener('click', async (evt) => {
-        evt.preventDefault();
-        const resendEmail = document.getElementById('resendVerificationEmail').value;
-        const resultSet = document.getElementById('resultSet');
-
-        if(resendEmail === ""){
-            resultSet.innerHTML = `<p style="color: red;">Email is Empty</p>`;
-            return;
-        }
-
-        resultSet.innerHTML = `<p style="color: orange">Email Sending process is running , Please wait patiently...</p>`;
-        
-        const response = await fetch("/resend-email",{
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({email:resendEmail})
-        })
-
-        const result = await response.json();
-        console.log(result.message);
-
-        if(response.ok){
-            resultSet.innerHTML = `<p style="color: green;">${result.message}</p>`;
-        }else{
-            console.error(result.message);
-            resultSet.innerHTML = `<p style="color: red;">${result.message}</p>`;
+            if(response.ok){
+                signupBtnText.textContent = 'Signup Success ✅';
+                signupSpinner.style.display = 'none';
+                showResult.textContent = `${result.message}`;
+                showResult.style.display = 'block';
+                showResult.style.color = '#45ff45';
+                setTimeout(() => {
+                    window.location.href = '/req/login';
+                }, 6000);
+            }else{
+                console.error(result.message);
+                signupBtn.disabled = false;
+                signupBtnText.textContent = 'Sign up';
+                signupSpinner.style.display = 'none';
+                showResult.textContent = `${result.message}`;
+                showResult.style.display = 'block';
+                setTimeout(() => {
+                    showResult.style.display = 'none';
+                }, 7000);
+            }
+        }catch(error){
+            console.error(error);
+            showResult.textContent = 'Internal server error, Try later';
+            showResult.style.display = 'block';
+        }finally{
+            signupBtn.disabled = false;
+            signupBtnText.textContent = 'Sign up';
+            signupSpinner.style.display = 'none';
         }
     })
 }

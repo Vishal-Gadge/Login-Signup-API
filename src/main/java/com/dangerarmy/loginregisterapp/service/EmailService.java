@@ -9,6 +9,8 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.hibernate.query.sqm.sql.BaseSqmToSqlAstConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -25,6 +27,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EmailService {
 
     private final JavaMailSender mailSender;
@@ -36,13 +39,15 @@ public class EmailService {
     private String from;
 
     public void sendVerificationEmail(String email , String verificationToken){
+
         String subject = "Email verification";
         String path = "/html/verifyEmail.html";
         String message = "Click the button below to verify your email address:";
-        sendEmail(email,verificationToken,subject,path,message);
+        sendVerEmail(email,verificationToken,subject,path,message);
     }
 
-    private void sendEmail(String email, String token, String subject, String path, String message) {
+    private void sendVerEmail(String email, String token, String subject, String path, String message) {
+
         try{
             String actionUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
                     .path(path)
@@ -70,9 +75,12 @@ public class EmailService {
             helper.setFrom(from);
             helper.setText(content, true);
             mailSender.send(mimeMessage);
+            log.info("Verification email has been sent to email :{}",maskEmail(email));
         }catch (MailException e){
-            throw new UnknownHostException("Email Service unavailable, Try again later");
+            log.error("Verification Email was not sent to :{} cause :{}",maskEmail(email), e.getCause().toString());
+            throw new UnknownHostException("Email Service unavailable, Check your internet or Try again later");
         } catch (MessagingException e) {
+            log.error("Verification Email was not created for email :{} cause :{}",maskEmail(email), e.getCause().toString());
             throw new RuntimeException("Email was not created",e);
         }
     }
@@ -80,10 +88,10 @@ public class EmailService {
     public void sendVerificationOtp(String email , String otp){
         String subject = "Forgot Password Verification";
         String message = "Enter this OTP to verify its you";
-        sendOtp(email, otp , subject, message);
+        sendVerOtp(email, otp , subject, message);
     }
 
-    public void sendOtp(String email, String otp , String subject , String message){
+    public void sendVerOtp(String email, String otp , String subject , String message){
         try {
             String content = """
                         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px;\s
@@ -103,32 +111,74 @@ public class EmailService {
             helper.setFrom(from);
             helper.setText(content, true);
             mailSender.send(mimeMessage);
+            log.info("Forgot Password Verification OTP email has been sent to email :{}",maskEmail(email));
         } catch (MailException e){
-            throw new UnknownHostException("Email Service unavailable, Try again later");
+            log.error("Forgot Password Verification OTP email was not sent to :{} cause :{}",maskEmail(email), e.getCause().toString());
+            throw new UnknownHostException("Email Service unavailable, Check your internet or Try again later");
         } catch (MessagingException e) {
+            log.error("Forgot Password Verification OTP email was not created for email :{} cause :{}",maskEmail(email), e.getCause().toString());
             throw new RuntimeException("Email was not created",e);
         }
     }
 
-    //http://localhost:8080/html/verifyEmail.html?token=fim
+    //signup service
+    public void sendAlreadyVerified(String email){
+        String subject = "User Already Verified";
+        String message = "<div><p>User Already Verified with this email , no need to verify again, Go login 😊</p><br></div>";
+        sendMail(email, subject, message);
+    }
+
+    //signup service
+    public void signupAttempted(String email){
+        String subject = "Signup Attempted";
+        String message = "<div><p>Signup for your email has been attempted, if its you ignore, if not secure your account by strong password</p></div>";
+        sendMail(email, subject, message);
+    }
+
+    public void sendMail(String email, String subject, String message) {
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
+
+            helper.setTo(email);
+            helper.setFrom(from);
+            helper.setSubject(subject);
+            helper.setText(message , true);
+            mailSender.send(mimeMessage);
+            log.info("Email for {} has been sent to email :{}",subject, maskEmail(email));
+        } catch (MailException e){
+            log.error("Email for {} was not sent to email :{} cause :{}",subject, maskEmail(email), e.getCause().toString());
+            throw new UnknownHostException("Email Service unavailable, Check your internet or Try again later");
+        }catch (MessagingException e) {
+            log.error("Email for {} was not created for email :{} cause :{}",subject, maskEmail(email), e.getCause().toString());
+            throw new RuntimeException("Email was not created",e);
+        }
+    }
+
+
+
     //Email controller work
     @Transactional
     public void verifyEmail(String token) {
             VerifyUser dbVerifyUser = verifyUserRepo.findByToken(token);
             if(dbVerifyUser == null){
-                throw new InvalidTokenException("verification link is invalid");
+                log.warn("Verification link to verify email was invalid for token :{} or user not exist for that token",token);
+                throw new InvalidTokenException("verification link or token is invalid");
             }
             if(dbVerifyUser.isVerified()){
+                log.warn("User already verified with the userId :{}",dbVerifyUser.getUserModel().getId());
                 throw new UserAlreadyVerifiedException("Email is already verified");
             }
             if(dbVerifyUser.getExpiresAt().before(new Date(System.currentTimeMillis()))){
+                log.error("Verification token is invalid for userId :{} and expired at :{}",
+                        dbVerifyUser.getUserModel().getId(), dbVerifyUser.getExpiresAt());
                 throw new ExpiredTokenException("Token has been expired");
             }
             dbVerifyUser.setVerified(true);
             dbVerifyUser.setToken(null);
             dbVerifyUser.setExpiresAt(null);
             verifyUserRepo.save(dbVerifyUser);
-            verifyUserRepo.flush();
+            log.info("User with userId :{} verified themself using email with token :{}",dbVerifyUser.getUserModel().getId(), token);
     }
 
 
@@ -137,6 +187,7 @@ public class EmailService {
 
         Optional<UserModel> dbuser = userRepo.findByEmail(email);
         if(dbuser.isEmpty()) {
+            log.warn("User not found for resend email :{}",maskEmail(email));
             throw new UsernameNotFoundException("User not found , Go signup first");
         }
 
@@ -147,15 +198,17 @@ public class EmailService {
         }
 
         if(verifyUser.isVerified()){
+            log.warn("User already verified with the email :{}",maskEmail(email));
             throw new UserAlreadyVerifiedException("User already verified");
         }
 
         //token present just expired
         if(verifyUser.getExpiresAt().after(new Date(System.currentTimeMillis()))){
-            System.out.println("token preset just expired, so just send token again with new expiration");
+            //token preset just expired, so just send token again with new expiration
             sendVerificationEmail(email,verifyUser.getToken());
             verifyUser.setExpiresAt(new Date(System.currentTimeMillis()+(1000*60*10)));
             verifyUserRepo.save(verifyUser);
+            log.info("Verification Token was resend to email :{}",maskEmail(email));
         }else{
             //if all set then should run
             String token = generateToken();
@@ -165,6 +218,7 @@ public class EmailService {
             verifyUser.setToken(token);
             verifyUser.setVerified(false);
             verifyUserRepo.save(verifyUser);
+            log.info("Verification Token was send to email :{}",maskEmail(email));
         }
     }
 
@@ -185,5 +239,21 @@ public class EmailService {
         byte[] bytes = new byte[8];
         new SecureRandom().nextBytes(bytes);
         return HexFormat.of().formatHex(bytes);
+    }
+
+    public String maskEmail(String email){
+        if(email == null || !email.contains("@")){
+            return "invalid-email";
+        }
+        String[] parts = email.split("@");
+        String name = parts[0];
+        String domain = parts[1];
+
+        //a****@gmail.com
+        if(name.length() <= 2){
+            return name.charAt(0)+ "****@" + domain;
+        }
+        //ab***c@gmail.com
+        return name.substring(0,2)+"****"+name.charAt(name.length() - 1) + "@" + domain;
     }
 }

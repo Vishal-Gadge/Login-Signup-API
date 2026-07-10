@@ -16,15 +16,9 @@ public class UserModel {
     @Column(name = "username")
     private String username;
 
-    @Column(name = "email")
+    @Column(name = "email" , nullable = false, unique = true)
     private String email;
 
     @Column(name = "password")
     private String password;
-
-//    @Column(name = "isVerified")
-//    private boolean isVerified = false;
-//
-//    @Column(name = "token")
-//    private String token;
 }

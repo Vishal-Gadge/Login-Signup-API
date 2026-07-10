@@ -19,7 +19,6 @@ public class EmailController {
 
     @PostMapping("/verify/email")
     public ResponseEntity<Map<String,String>> verifyEmail(@RequestParam String token){
-        //betrayed line
         //System.out.println(emailService.verifyEmail(token));
         emailService.verifyEmail(token);
         return ResponseEntity.ok()
@@ -27,9 +26,8 @@ public class EmailController {
     }
 
     @PostMapping("/resend-email")
-    public ResponseEntity<?> resendEmail(@RequestBody EmailRequest req){
+    public ResponseEntity<Map<String, String>> resendEmail(@RequestBody EmailRequest req){
         emailService.isValidEmail(req.getEmail());
-
         emailService.resendEmail(req.getEmail());
         return ResponseEntity.ok(Map.of("message","Email Resend Successfully"));
     }

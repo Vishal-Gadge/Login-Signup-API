@@ -62,10 +62,6 @@ public class JwtService {
         try{
             String subject = claims.getSubject();
             Date expiry = claims.getExpiration();
-            System.out.println("jwt check: subject="+subject+" |expected = "+username);
-            System.out.println("jwt check: subject="+expiry+" |expected = "+new Date());
-            System.out.println("jwt check: subject="+expiry.before(new Date()));
-
             return subject.equals(username) && expiry.after(new Date());
         }catch (Exception e){
             log.error("Token verification failed",e);

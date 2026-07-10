@@ -19,7 +19,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @AllArgsConstructor
 public class SecurityConfig { 
 
-
     @Autowired
     private final JwtFilter jwtFilter;
 
@@ -30,36 +29,34 @@ public class SecurityConfig {
     
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity){
-        System.out.println(">>> LOADING SECURITY CONFIG <<<");
-
         return httpSecurity
-                    .csrf(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable)
 
-                    .authorizeHttpRequests(auth -> {
-                        auth.requestMatchers("/req/signup", "/req/login","/req/signup/save",
-                                            "/req/login/**","/req/login/verify","/favicon.ico","/test","/verify/email",
-                                             "/req/logout","/html/logout.html","/test/**",
-                                             "/req/forgotPass","/verify/forgotPass","/html/forgotPass.html","/redis-test",
-                                             "/html/resend-verification.html","/resend-email",
-											 "/css/**","/js/**","/images/**","/static/**","/html/**","/favicon.ico")
-                                .permitAll();
-                        auth.requestMatchers("/admin/**").hasRole("ADMIN");
-                        auth.anyRequest().authenticated();
-                    })
+                .authorizeHttpRequests(auth -> {
+                    auth.requestMatchers("/req/signup", "/req/login","/req/signup/save",
+                                    "/req/login/**","/req/login/verify","/favicon.ico","/test","/verify/email",
+                                    "/req/logout","/html/logout.html","/test/**",
+                                    "/req/forgotPass","/verify/forgotPass","/html/forgotPass.html","/redis-test",
+                                    "/html/resend-verification.html","/resend-email",
+                                    "/css/**","/js/**","/images/**","/static/**","/html/**","/favicon.ico")
+                            .permitAll();
+                    auth.requestMatchers("/admin/**").hasRole("ADMIN");
+                    auth.anyRequest().authenticated();
+                })
 
-                    .exceptionHandling(ex -> ex
-                            .authenticationEntryPoint((request,
-                                                       response,
-                                                       authException) ->
-                                    response.sendRedirect("/req/login")
-                            )
-                    )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request,
+                                                   response,
+                                                   authException) ->
+                                response.sendRedirect("/req/login")
+                        )
+                )
 
-                    .sessionManagement(session -> session
-                            .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                    .addFilterBefore(jwtFilter , UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtFilter , UsernamePasswordAuthenticationFilter.class)
 
-                    .build();
+                .build();
     }
 }

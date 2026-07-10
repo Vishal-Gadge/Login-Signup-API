@@ -36,11 +36,8 @@ public class AdminController {
     public ResponseEntity<Map<String, String>> addAdmin(@RequestBody UserModel admin){
         try {
             adminService.addAdmin(admin);
-            System.out.println("new admin added successfully");
             return ResponseEntity.ok(Map.of("message","Admin Saved Successfully"));
         } catch (Exception e) {
-            System.out.println("admin was not added"+e.getMessage());
-            System.out.println(e.getCause());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                                  .body(Map.of("error","Unfortunately Admin was not saved"));
         }

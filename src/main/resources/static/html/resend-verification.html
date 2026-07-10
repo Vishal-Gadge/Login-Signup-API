@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Resend Verification link</title>
+    <title>Email Verification link</title>
     <style>
         *{
             background-color: cyan;
-            padding: 10px;
+            padding: 7px;
             margin: 5px;
             font-size: 1rem;
         }
@@ -17,21 +17,24 @@
             border:1px solid black;
         }
         button{
-            width: 100px;
             border-radius: 10px;
             text-decoration: none;
             border: 1px solid black;
-            margin-left: 7%;
         }
     </style>
 </head>
 <body>
-    <h1 style="font-size: 1.3rem;">Resend verification</h1>
-    <div id="resultSet">
+    <h1 style="font-size: 1.3rem;">Email verification</h1>
+    <div>
         <input type="email" placeholder="JohnDoe123@gmail.com" id="resendVerificationEmail"><br>
-        <button type="button" id="resendEmailButton">Send Link</button>
+        <button type="button" id="resendEmailButton">
+            <span id="resendBtnText">Send link</span>
+            <span id="resendBtnSpinner" style="display: none;">⏳</span>
+        </button>
+
+        <div id="result" style="display: none; color: red;"></div>
     </div>
 
-<script src="/js/signup.js"></script>
+<script src="/js/resendEmail.js"></script>
 </body>
 </html>
