@@ -26,7 +26,7 @@ if(signupBtn != null){
 
         //not match
         if(userDetails.password !== confPassword){
-            showResult.textContent = "Password dosen't match Confirm password";
+            showResult.textContent = "Password doesn't match Confirm password";
             showResult.style.display = 'block';
             setTimeout(() => {
                 showResult.style.display = 'none';
@@ -52,31 +52,28 @@ if(signupBtn != null){
 
             if(response.ok){
                 signupBtnText.textContent = 'Signup Success ✅';
-                signupSpinner.style.display = 'none';
                 showResult.textContent = `${result.message}`;
                 showResult.style.display = 'block';
-                showResult.style.color = '#45ff45';
+                showResult.style.color = 'rgb(0, 226, 255)';
                 setTimeout(() => {
                     window.location.href = '/req/login';
-                }, 6000);
+                }, 10000);
             }else{
                 console.error(result.message);
-                signupBtn.disabled = false;
                 signupBtnText.textContent = 'Sign up';
-                signupSpinner.style.display = 'none';
                 showResult.textContent = `${result.message}`;
                 showResult.style.display = 'block';
                 setTimeout(() => {
                     showResult.style.display = 'none';
-                }, 7000);
+                }, 10000);
             }
         }catch(error){
             console.error(error);
-            showResult.textContent = 'Internal server error, Try later';
+            showResult.textContent = 'Internal server error, Try again later';
             showResult.style.display = 'block';
+            signupBtnText.textContent = 'Sign up';
         }finally{
             signupBtn.disabled = false;
-            signupBtnText.textContent = 'Sign up';
             signupSpinner.style.display = 'none';
         }
     })

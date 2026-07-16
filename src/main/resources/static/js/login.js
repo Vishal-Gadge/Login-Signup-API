@@ -35,33 +35,29 @@ if(loginBtn != null){
             const result = await response.json();
 
             if(response.ok){
-                console.log('btn text is: ',btnText);
-                document.getElementById('loginBtnText').textContent = 'Login Success✅';
-                btnSpinner.style.display = 'none';
-                showResult.textContent = ` You will be redirect to Homepage`;
+                btnText.textContent = 'Login Success✅';
+                showResult.textContent = 'You will be redirect to Homepage';
                 showResult.style.display = 'block';
-                showResult.style.color = '#45ff45';
-                // setTimeout(() => {
-                //     window.location.href = '/';
-                // }, 5000);
+                showResult.style.color = 'rgb(0, 226, 255)';
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 5000);
             }else{
                 console.error(result.message);
-                loginBtn.disabled = false;
                 btnText.textContent = 'Log in';
-                btnSpinner.style.display = 'none';
                 showResult.textContent = `${result.message}`;
                 showResult.style.display = 'block';
                 setTimeout(() => {
                     showResult.style.display = 'none';
-                }, 7000);
+                }, 10000);
             }
         }catch(error){
             console.error(error);
             showResult.textContent = 'Internal server error, Try later';
             showResult.style.display = 'block';
+            btnText.textContent = 'Log in';
         }finally{
             loginBtn.disabled = false;
-            btnText.textContent = 'Log in';
             btnSpinner.style.display = 'none';
         }    
     })

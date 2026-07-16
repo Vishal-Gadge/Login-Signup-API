@@ -10,11 +10,11 @@ import jakarta.mail.internet.MimeMessage;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.query.sqm.sql.BaseSqmToSqlAstConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -38,6 +38,7 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String from;
 
+    @Async
     public void sendVerificationEmail(String email , String verificationToken){
 
         String subject = "Email verification";
@@ -77,14 +78,15 @@ public class EmailService {
             mailSender.send(mimeMessage);
             log.info("Verification email has been sent to email :{}",maskEmail(email));
         }catch (MailException e){
-            log.error("Verification Email was not sent to :{} cause :{}",maskEmail(email), e.getCause().toString());
-            throw new UnknownHostException("Email Service unavailable, Check your internet or Try again later");
+            log.error("Verification Email was not sent to :{}",maskEmail(email), e);
+//            throw new UnknownHostException("Email Service unavailable, Check your internet or Try again later");
         } catch (MessagingException e) {
             log.error("Verification Email was not created for email :{} cause :{}",maskEmail(email), e.getCause().toString());
-            throw new RuntimeException("Email was not created",e);
+//            throw new RuntimeException("Email was not created",e);
         }
     }
 
+    @Async
     public void sendVerificationOtp(String email , String otp){
         String subject = "Forgot Password Verification";
         String message = "Enter this OTP to verify its you";
@@ -122,6 +124,7 @@ public class EmailService {
     }
 
     //signup service
+    @Async
     public void sendAlreadyVerified(String email){
         String subject = "User Already Verified";
         String message = "<div><p>User Already Verified with this email , no need to verify again, Go login 😊</p><br></div>";
@@ -129,6 +132,7 @@ public class EmailService {
     }
 
     //signup service
+    @Async
     public void signupAttempted(String email){
         String subject = "Signup Attempted";
         String message = "<div><p>Signup for your email has been attempted, if its you ignore, if not secure your account by strong password</p></div>";
@@ -208,7 +212,7 @@ public class EmailService {
             sendVerificationEmail(email,verifyUser.getToken());
             verifyUser.setExpiresAt(new Date(System.currentTimeMillis()+(1000*60*10)));
             verifyUserRepo.save(verifyUser);
-            log.info("Verification Token was resend to email :{}",maskEmail(email));
+            log.info("Empty verify User was saved for user email :{}",maskEmail(email));
         }else{
             //if all set then should run
             String token = generateToken();

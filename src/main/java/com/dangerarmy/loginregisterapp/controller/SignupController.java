@@ -22,6 +22,6 @@ public class SignupController {
     public ResponseEntity<Map<String, String>> signup(@RequestBody SignupRequest user) {
         signupService.signup(user);
         return ResponseEntity.ok(Map.of("message",
-                "If an account exists with this email, you will receive instructions, check mail"));
+                "If an account exists with this email, we've sent a verification link. Check inbox/spam or tap Verify Email to resend"));
     }
 }

@@ -29,6 +29,7 @@ public class EmailController {
     public ResponseEntity<Map<String, String>> resendEmail(@RequestBody EmailRequest req){
         emailService.isValidEmail(req.getEmail());
         emailService.resendEmail(req.getEmail());
-        return ResponseEntity.ok(Map.of("message","Email Resend Successfully"));
+        return ResponseEntity.ok(Map.of("message",
+                "If an account exists and is unverified, a new verification link has been sent"));
     }
 }

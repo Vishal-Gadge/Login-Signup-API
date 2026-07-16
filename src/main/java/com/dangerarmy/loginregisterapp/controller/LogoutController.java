@@ -1,26 +1,21 @@
 package com.dangerarmy.loginregisterapp.controller;
 
+import com.dangerarmy.loginregisterapp.service.LogoutService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
-@Slf4j
+@RequiredArgsConstructor
 public class LogoutController {
 
+    private final LogoutService logoutService;
+
     @PostMapping("/req/logout")
-    public String logout(HttpServletResponse servletResponse){
-        ResponseCookie logoutCookie = ResponseCookie.from("jwt","")
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .maxAge(0)
-                .sameSite("Lax")
-                .build();
-        servletResponse.addHeader(HttpHeaders.SET_COOKIE , logoutCookie.toString());
+    public String logout(HttpServletRequest servletRequest, HttpServletResponse servletResponse){
+        logoutService.logout(servletRequest, servletResponse);
         return "redirect:/req/login";
     }
 }
