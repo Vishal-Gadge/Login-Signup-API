@@ -1,6 +1,5 @@
 services:
 
- # docker run -d --name redis -p 6379:6379 -v loginregister_redis_data:/data 6ab0b6e73817 redis-server --appendonly yes
   redis:
     image: redis:7-alpine
     ports:
@@ -20,16 +19,14 @@ services:
       - mysql_data:/var/lib/mysql
 
   app:
-    build: .
+    image: dangerarmy/loginregister-app:v1
     ports:
       - "8080:8080"
-    env_file:
-      - .env
     volumes:
       - ./.env:/app/.env
     depends_on:
       - mysql
-      - redisContainer
+      - redis
 
 volumes:
   mysql_data:
